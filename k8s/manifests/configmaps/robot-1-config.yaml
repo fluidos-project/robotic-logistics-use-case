@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: robot-1
+data:
+  description.file: dual_laser.urdf.xacro
+  id: robot
+  init.position.x: "2.0"
+  init.position.y: "2.0"
+  init.position.z: "0.1"

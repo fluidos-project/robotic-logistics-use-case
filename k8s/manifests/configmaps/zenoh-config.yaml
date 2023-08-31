@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zenoh
+data:
+  multicast.scouting: "false"
+  forward.discovery: "false"
+  localhost.only: "true"
+  mode: "client"
+  scope: "robot-1"
+  listeners: >-
+    tcp/0.0.0.0:7447
+    tcp/zenoh-router:7447
+  endpoints: >-
+    tcp/zenoh-router:7447

@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: robots-gazebo
+spec:
+  type: ClusterIP
+  ports:
+    - name: gazebo
+      port: 11345
+      protocol: TCP
+    - name: zenoh
+      port: 7447
+      protocol: TCP
+  selector:
+    app: gazebo-server
+    group: robot-common-group
+    robotType: simulated
