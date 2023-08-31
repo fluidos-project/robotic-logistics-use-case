@@ -1,0 +1,18 @@
+# configure the tcp configmap
+tcp:
+  7447: robots/zenoh-router:7447
+
+# enable the service and expose the tcp ports.
+# be careful as this will pontentially make them
+# availble on the public web
+controller:
+  service:
+    enabled: true
+    ports:
+      http: 80
+      https: 443
+      zenoh: 7447
+    targetPorts:
+      http: http
+      https: https
+      zenoh: zenoh

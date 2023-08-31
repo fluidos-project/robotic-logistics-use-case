@@ -1,0 +1,29 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: zenoh-router
+  labels:
+    app: zenoh-router
+    middlewareName: zenoh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zenoh-router
+      middlewareName: zenoh
+  template:
+    metadata:
+      labels:
+        app: zenoh-router
+        middlewareName: zenoh
+    spec:
+      containers:
+        - name: zenoh-router
+          image: eclipse/zenoh:0.7.2-rc
+          imagePullPolicy: Always
+          env:
+            - name: RUST_LOG
+              value: debug
+          args:
+            - --no-multicast-scouting

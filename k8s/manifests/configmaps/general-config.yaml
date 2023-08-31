@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: robots-common
+data:
+
+  # Ros domain id
+  ros.domain.id: "40"
+
+  # master uri
+  gazebo.master.uri: http://robots-gazebo:11345
+
+  # world
+  gazebo.world: "opil_factory"
+
+  # devel environment
+  devel.environment: "true"
+
+  # Use gpu for simulation
+  use.gpu: "false"

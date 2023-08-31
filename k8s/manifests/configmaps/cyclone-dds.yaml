@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyclone-dds-local-config
+data:
+  cyclone-dds-profiles.xml: |
+    <?xml version="1.0" encoding="utf-8"?>
+    <CycloneDDS
+      xmlns="https://cdds.io/config"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd"
+    >
+      <Domain Id="any">
+        <General>
+          <Interfaces>
+            <NetworkInterface
+              autodetermine="false"
+              priority="default"
+              multicast="false"
+              name="lo"
+            />
+          </Interfaces>
+          <AllowMulticast>false</AllowMulticast>
+        </General>
+        <Discovery>
+              <ParticipantIndex>auto</ParticipantIndex>
+              <Peers>
+                  <Peer Address="localhost"/>
+              </Peers>
+              <MaxAutoParticipantIndex>120</MaxAutoParticipantIndex>
+          </Discovery>
+        <Tracing>
+          <Verbosity>config</Verbosity>
+          <OutputFile>
+          ${HOME}/.cdds.log.${CYCLONEDDS_PID}
+        </OutputFile>
+        </Tracing>
+      </Domain>
+    </CycloneDDS>

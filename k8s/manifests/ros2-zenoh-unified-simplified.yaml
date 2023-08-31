@@ -1,0 +1,354 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zenoh-router
+spec:
+  type: ClusterIP
+  ports:
+    - name: zenoh-router
+      port: 7447
+      protocol: TCP
+      targetPort: 7447
+  selector:
+    app: zenoh-router
+    middlewareName: zenoh
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: talker
+spec:
+  type: ClusterIP
+  ports:
+    - name: zenoh
+      port: 7447
+      protocol: TCP
+  selector:
+    app: talker
+    group: robot-common-group
+    robotType: simulated
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: listener
+spec:
+  type: ClusterIP
+  ports:
+    - name: zenoh
+      port: 7447
+      targetPort: 7447
+      protocol: TCP
+  selector:
+    app: listener
+    group: robot-common-group
+    robotType: simulated
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyclone-dds-local-config
+data:
+  cyclone-dds-profiles.xml: |
+    <?xml version="1.0" encoding="utf-8"?>
+    <CycloneDDS
+      xmlns="https://cdds.io/config"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd"
+    >
+      <Domain Id="any">
+        <General>
+          <Interfaces>
+            <NetworkInterface
+              autodetermine="false"
+              priority="default"
+              multicast="false"
+              name="lo"
+            />
+          </Interfaces>
+          <AllowMulticast>false</AllowMulticast>
+        </General>
+        <Discovery>
+              <ParticipantIndex>auto</ParticipantIndex>
+              <Peers>
+                  <Peer Address="localhost"/>
+              </Peers>
+              <MaxAutoParticipantIndex>120</MaxAutoParticipantIndex>
+          </Discovery>
+        <Tracing>
+          <Verbosity>config</Verbosity>
+          <OutputFile>
+          ${HOME}/.cdds.log.${CYCLONEDDS_PID}
+        </OutputFile>
+        </Tracing>
+      </Domain>
+    </CycloneDDS>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: robots-common
+data:
+
+  # Ros domain id
+  ros.domain.id: "40"
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: zenoh-router
+  labels:
+    app: zenoh-router
+    middlewareName: zenoh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zenoh-router
+      middlewareName: zenoh
+  template:
+    metadata:
+      labels:
+        app: zenoh-router
+        middlewareName: zenoh
+    spec:
+      containers:
+        - name: zenoh-router
+          image: eclipse/zenoh:0.7.2-rc
+          imagePullPolicy: Always
+          env:
+            - name: RUST_LOG
+              value: debug
+          args:
+            - --no-multicast-scouting
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: talker
+  labels:
+    app: talker
+    group: robot-common-group
+    robotType: simulated
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: talker
+      group: robot-common-group
+      robotType: simulated
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: talker
+        group: robot-common-group
+        robotType: simulated
+    spec:
+      volumes:
+        - name: cyclone-dds-cfg
+          configMap:
+            name: cyclone-dds-local-config
+      containers:
+        - name: talker
+          image: >-
+            robotnik/zenoh-dds-bridge:humble-0.7.2-rc-1
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: cyclone-dds-cfg
+              mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+              subPath: cyclone-dds-profiles.xml
+          env:
+            - name: ROS_DOMAIN_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: ros.domain.id
+            - name: STARTUP_TYPE
+              value: run
+            - name: ROS_BU_PKG
+              value: demo_nodes_py
+            - name: ROS_BU_LAUNCH
+              value: talker
+            - name: HEALTHCHECK_NODES
+              value: "/talker"
+            - name: CYCLONEDDS_URI
+              value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+          startupProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 30
+            timeoutSeconds: 10
+        - name: zenoh-bridge
+          image: >-
+            robotnik/zenoh-dds-bridge:humble-0.7.2-rc-1
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: cyclone-dds-cfg
+              mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+              subPath: cyclone-dds-profiles.xml
+          env:
+            - name: ROS_DOMAIN_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: ros.domain.id
+            - name: CYCLONEDDS_URI
+              value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+            - name: ZENOH_MULTICAST_SCOUTING
+              value: "false"
+            - name: ZENOH_FORWARD_DISCOVERY
+              value: "false"
+            - name: ZENOH_LISTENERS
+              value: >-
+                 tcp/0.0.0.0:7447
+                 tcp/talker:7447
+               # tcp/zenoh-router:7447
+            - name: ZENOH_ENDPOINTS
+              value: >-
+                tcp/192.168.2.205:7448
+              # tcp/zenoh-router:7447
+            - name: RUST_LOG
+              value: debug
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: listener
+  labels:
+    app: listener
+    group: robot-common-group
+    robotType: simulated
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: listener
+      group: robot-common-group
+      robotType: simulated
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: listener
+        group: robot-common-group
+        robotType: simulated
+    spec:
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: cyclone-dds-cfg
+          configMap:
+            name: cyclone-dds-local-config
+      containers:
+        - name: listener
+          image: >-
+            robotnik/zenoh-dds-bridge:humble-0.7.2-rc-1
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: data
+              mountPath: /home/robot/data
+            - name: cyclone-dds-cfg
+              mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+              subPath: cyclone-dds-profiles.xml
+          env:
+            - name: ROS_DOMAIN_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: ros.domain.id
+            - name: STARTUP_TYPE
+              value: run
+            - name: ROS_BU_PKG
+              value: demo_nodes_py
+            - name: ROS_BU_LAUNCH
+              value: listener
+            - name: HEALTHCHECK_NODES
+              value: "/listener"
+            - name: CYCLONEDDS_URI
+              value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+
+          startupProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 3
+
+        - name: zenoh-bridge
+          image: >-
+            robotnik/zenoh-dds-bridge:humble-0.7.2-rc-1
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: cyclone-dds-cfg
+              mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+              subPath: cyclone-dds-profiles.xml
+          env:
+            - name: ROS_DOMAIN_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: ros.domain.id
+            - name: CYCLONEDDS_URI
+              value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+            - name: ZENOH_MULTICAST_SCOUTING
+              value: "false"
+            - name: ZENOH_FORWARD_DISCOVERY
+              value: "false"
+            - name: ZENOH_LISTENERS
+              value: >-
+                 tcp/0.0.0.0:7447
+                 tcp/listener:7447
+            #      tcp/zenoh-router:7447
+            - name: ZENOH_ENDPOINTS
+              value: >-
+                tcp/192.168.2.205:7448
+              # tcp/zenoh-router:7447
+            - name: RUST_LOG
+              value: debug

@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zenoh-router
+spec:
+  type: ClusterIP
+  ports:
+    - name: zenoh-router
+      port: 7447
+      protocol: TCP
+      targetPort: 7447
+  selector:
+    app: zenoh-router
+    middlewareName: zenoh

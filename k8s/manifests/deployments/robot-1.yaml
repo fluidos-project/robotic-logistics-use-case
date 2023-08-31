@@ -1,0 +1,640 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: robot-1-map-server
+  labels:
+    app: map-server
+    group: robot-1
+    robotType: simulated
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: map-server
+      group: robot-1
+      robotType: simulated
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: map-server
+        group: robot-1
+        robotType: simulated
+    spec:
+      volumes:
+        - name: cyclone-dds-cfg
+          configMap:
+            name: cyclone-dds-local-config
+      containers:
+        - name: map-server
+          image: >-
+            robotnik/robotnik-simulations:rb-theron-gazebo-humble-0.3.0-rc03
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: cyclone-dds-cfg
+              mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+              subPath: cyclone-dds-profiles.xml
+          env:
+            - name: ROS_DOMAIN_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: ros.domain.id
+            - name: DEVELOPMENT_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: devel.environment
+            - name: MAP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: gazebo.world
+            - name: ROBOT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robot-1
+                  key: id
+            # Fixed configuration
+            - name: ROS_BU_PKG
+              value: rb_theron_localization
+            - name: ROS_BU_LAUNCH
+              value: map_server.launch.py
+            - name: CHECK_NODES
+              value: "true"
+            - name: NODES_TO_CHECK
+              value: >
+                /${ROBOT_ID}/robot_state_publisher
+            - name: HEALTHCHECK_NODES
+              value: >
+                /${ROBOT_ID}/map_server
+                /${ROBOT_ID}/lifecycle_manager_map_server
+            # - name: CYCLONEDDS_URI
+            #   value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+          resources:
+            requests:
+              cpu: 300m
+              memory: 80Mi
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - "/bin/bash"
+                  - "-c"
+                  - |
+                    if [[ $DEVELOPMENT_ENVIRONMENT == "true" ]]
+                    then
+                      exit 0
+                    fi
+                    sudo apt -y purge \
+                      wget \
+                      curl \
+                    sudo apt clean
+                    sudo sed -i '/%robot ALL=(ALL) NOPASSWD:ALL/d' /etc/sudoers
+                    exit 0
+          startupProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 30
+            timeoutSeconds: 10
+        # - name: zenoh-bridge
+        #   image: >-
+        #     robotnik/zenoh-dds-bridge:humble-0.7.2-rc-1
+        #   imagePullPolicy: Always
+        #   volumeMounts:
+        #     - name: cyclone-dds-cfg
+        #       mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+        #       subPath: cyclone-dds-profiles.xml
+        #   env:
+        #     - name: CYCLONEDDS_URI
+        #       value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+        #     - name: ROS_DOMAIN_ID
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: robots-common
+        #           key: ros.domain.id
+        #     - name: ZENOH_MULTICAST_SCOUTING
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: multicast.scouting
+        #     - name: ZENOH_FORWARD_DISCOVERY
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: forward.discovery
+        #     - name: ZENOH_LISTENERS
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: listeners
+        #     - name: ZENOH_ENDPOINTS
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: endpoints
+        #     - name: RUST_LOG
+        #       value: debug
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: robot-1-localization
+  labels:
+    app: localization
+    group: robot-1
+    robotType: simulated
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: localization
+      group: robot-1
+      robotType: simulated
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: localization
+        group: robot-1
+        robotType: simulated
+    spec:
+      volumes:
+        - name: cyclone-dds-cfg
+          configMap:
+            name: cyclone-dds-local-config
+      containers:
+        - name: amcl
+          volumeMounts:
+            - name: cyclone-dds-cfg
+              mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+              subPath: cyclone-dds-profiles.xml
+          image: >-
+            robotnik/robotnik-simulations:rb-theron-gazebo-humble-0.3.0-rc03
+          imagePullPolicy: Always
+          env:
+            - name: ROS_DOMAIN_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: ros.domain.id
+            - name: DEVELOPMENT_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: devel.environment
+            - name: ROBOT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robot-1
+                  key: id
+            # Fixed configuration
+            - name: ROS_BU_PKG
+              value: rb_theron_localization
+            - name: ROS_BU_LAUNCH
+              value: amcl.launch.py
+            - name: CHECK_NODES
+              value: "true"
+            - name: NODES_TO_CHECK
+              value: >
+                /${ROBOT_ID}/robot_state_publisher
+            - name: HEALTHCHECK_NODES
+              value: >
+                /${ROBOT_ID}/amcl
+                /robot/lifecycle_manager_localization
+            # - name: CYCLONEDDS_URI
+            #   value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+          resources:
+            requests:
+              cpu: 500m
+              memory: 80Mi
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - "/bin/bash"
+                  - "-c"
+                  - |
+                    if [[ $DEVELOPMENT_ENVIRONMENT == "true" ]]
+                    then
+                      exit 0
+                    fi
+                    sudo apt -y purge \
+                      wget \
+                      curl \
+                    sudo apt clean
+                    sudo sed -i '/%robot ALL=(ALL) NOPASSWD:ALL/d' /etc/sudoers
+                    exit 0
+          startupProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 30
+            timeoutSeconds: 10
+        # - name: zenoh-bridge
+        #   image: >-
+        #     robotnik/zenoh-dds-bridge:humble-0.7.2-rc-1
+        #   imagePullPolicy: Always
+        #   volumeMounts:
+        #     - name: cyclone-dds-cfg
+        #       mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+        #       subPath: cyclone-dds-profiles.xml
+        #   env:
+        #     - name: CYCLONEDDS_URI
+        #       value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+        #     - name: ROS_DOMAIN_ID
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: robots-common
+        #           key: ros.domain.id
+        #     - name: ZENOH_MULTICAST_SCOUTING
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: multicast.scouting
+        #     - name: ZENOH_FORWARD_DISCOVERY
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: forward.discovery
+        #     - name: ZENOH_LISTENERS
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: listeners
+        #     - name: ZENOH_ENDPOINTS
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: endpoints
+        #     - name: RUST_LOG
+        #       value: debug
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: robot-1-laser-merger
+  labels:
+    app: laser-merger
+    group: robot-1
+    robotType: simulated
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: laser-merger
+      group: robot-1
+      robotType: simulated
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: laser-merger
+        group: robot-1
+        robotType: simulated
+    spec:
+      volumes:
+        - name: cyclone-dds-cfg
+          configMap:
+            name: cyclone-dds-local-config
+      containers:
+        - name: laser-merger
+          image: >-
+            robotnik/robotnik-simulations:rb-theron-gazebo-humble-0.3.0-rc03
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: cyclone-dds-cfg
+              mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+              subPath: cyclone-dds-profiles.xml
+          env:
+            - name: ROS_DOMAIN_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: ros.domain.id
+            - name: DEVELOPMENT_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: devel.environment
+            - name: ROBOT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robot-1
+                  key: id
+            # Fixed configuration
+            - name: ROS_BU_PKG
+              value: rb_theron_localization
+            - name: ROS_BU_LAUNCH
+              value: merge_laser.launch.py
+            - name: CHECK_NODES
+              value: "true"
+            - name: NODES_TO_CHECK
+              value: >
+                /${ROBOT_ID}/robot_state_publisher
+            - name: HEALTHCHECK_NODES
+              value: >
+                /${ROBOT_ID}/laserscan_merger
+            # - name: CYCLONEDDS_URI
+            #   value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+          resources:
+            requests:
+              cpu: 400m
+              memory: 80Mi
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - "/bin/bash"
+                  - "-c"
+                  - |
+                    if [[ $DEVELOPMENT_ENVIRONMENT == "true" ]]
+                    then
+                      exit 0
+                    fi
+                    sudo apt -y purge \
+                      wget \
+                      curl \
+                    sudo apt clean
+                    sudo sed -i '/%robot ALL=(ALL) NOPASSWD:ALL/d' /etc/sudoers
+                    exit 0
+          startupProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 30
+            timeoutSeconds: 10
+        # - name: zenoh-bridge
+        #   image: >-
+        #     robotnik/zenoh-dds-bridge:humble-0.7.2-rc-1
+        #   imagePullPolicy: Always
+        #   volumeMounts:
+        #     - name: cyclone-dds-cfg
+        #       mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+        #       subPath: cyclone-dds-profiles.xml
+        #   env:
+        #     - name: CYCLONEDDS_URI
+        #       value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+        #     - name: ROS_DOMAIN_ID
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: robots-common
+        #           key: ros.domain.id
+        #     - name: ZENOH_MULTICAST_SCOUTING
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: multicast.scouting
+        #     - name: ZENOH_FORWARD_DISCOVERY
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: forward.discovery
+        #     - name: ZENOH_LISTENERS
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: listeners
+        #     - name: ZENOH_ENDPOINTS
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: endpoints
+        #     - name: RUST_LOG
+        #       value: debug
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: robot-1-navigation
+  labels:
+    app: navigation
+    group: robot-1
+    robotType: simulated
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: navigation
+      group: robot-1
+      robotType: simulated
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: navigation
+        group: robot-1
+        robotType: simulated
+    spec:
+      volumes:
+        - name: cyclone-dds-cfg
+          configMap:
+            name: cyclone-dds-local-config
+      containers:
+        - name: navigation
+          image: >-
+            robotnik/robotnik-simulations:rb-theron-gazebo-humble-0.3.0-rc03
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: cyclone-dds-cfg
+              mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+              subPath: cyclone-dds-profiles.xml
+          env:
+            - name: ROS_DOMAIN_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: ros.domain.id
+            - name: DEVELOPMENT_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: robots-common
+                  key: devel.environment
+            - name: ROBOT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: robot-1
+                  key: id
+            # Fixed configuration
+            - name: ROS_BU_PKG
+              value: rb_theron_navigation
+            - name: ROS_BU_LAUNCH
+              value: default.launch.py
+            - name: CHECK_NODES
+              value: "true"
+            - name: NODES_TO_CHECK
+              value: >
+                /${ROBOT_ID}/robot_state_publisher
+                /${ROBOT_ID}/amcl
+                /${ROBOT_ID}/map_server
+            - name: HEALTHCHECK_NODES
+              value: >
+                /${ROBOT_ID}/controller_server
+                /${ROBOT_ID}/smoother_server
+                /${ROBOT_ID}/planner_server
+                /${ROBOT_ID}/behavior_server
+                /${ROBOT_ID}/bt_navigator
+                /${ROBOT_ID}/waypoint_follower
+                /${ROBOT_ID}/velocity_smoother
+                /${ROBOT_ID}/lifecycle_manager_navigation
+            # - name: CYCLONEDDS_URI
+            #   value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+          resources:
+            requests:
+              cpu: 1200m
+              memory: 200Mi
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - "/bin/bash"
+                  - "-c"
+                  - |
+                    if [[ $DEVELOPMENT_ENVIRONMENT == "true" ]]
+                    then
+                      exit 0
+                    fi
+                    sudo apt -y purge \
+                      wget \
+                      curl \
+                    sudo apt clean
+                    sudo sed -i '/%robot ALL=(ALL) NOPASSWD:ALL/d' /etc/sudoers
+                    exit 0
+          startupProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - ros_entrypoint.sh
+                - ros_healthcheck.sh
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 30
+            timeoutSeconds: 10
+        # - name: zenoh-bridge
+        #   image: >-
+        #     robotnik/zenoh-dds-bridge:humble-0.7.2-rc-1
+        #   imagePullPolicy: Always
+        #   volumeMounts:
+        #     - name: cyclone-dds-cfg
+        #       mountPath: /etc/cyclone-dds/cyclone-dds-profiles.xml
+        #       subPath: cyclone-dds-profiles.xml
+        #   env:
+        #     - name: CYCLONEDDS_URI
+        #       value: /etc/cyclone-dds/cyclone-dds-profiles.xml
+        #     - name: ROS_DOMAIN_ID
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: robots-common
+        #           key: ros.domain.id
+        #     - name: ZENOH_MULTICAST_SCOUTING
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: multicast.scouting
+        #     - name: ZENOH_FORWARD_DISCOVERY
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: forward.discovery
+        #     - name: ZENOH_LISTENERS
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: listeners
+        #     - name: ZENOH_ENDPOINTS
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: zenoh
+        #           key: endpoints
+        #     - name: RUST_LOG
+        #       value: debug

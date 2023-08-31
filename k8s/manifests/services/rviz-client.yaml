@@ -1,0 +1,27 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rviz
+spec:
+  type: ClusterIP
+  ports:
+    - name: websocket
+      port: 8080
+      targetPort: 8080
+    - name: webserver
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: fileserver
+      port: 81
+      targetPort: 81
+      protocol: TCP
+    # - name: zenoh
+    #   port: 7447
+    #   targetPort: 7447
+    #   protocol: TCP
+  selector:
+    app: rviz
+    group: robot-common-group
+    robotType: simulated
