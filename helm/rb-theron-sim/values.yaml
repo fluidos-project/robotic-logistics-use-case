@@ -1,0 +1,20 @@
+---
+containers:
+  environment:
+    production: true
+ros:
+  rmw: rmw_cyclonedds_cpp
+  discovery: subnet
+  distro: humble
+  images:
+    registry: "docker.io"
+    project: "robotnik"
+    image: "robotnik-simulations"
+    simulation: "rb-theron-gazebo"
+    version: 0.3.0-rc07
+  gazebo:
+    map: opil_factory
+services:
+  gazebo:
+    name: robots-gazebo
+    port: 11345
