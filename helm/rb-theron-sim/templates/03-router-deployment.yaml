@@ -28,11 +28,12 @@ spec:
           configMap:
             name: {{ .Release.Name }}-{{ .Release.Revision }}-zenoh-config
             items:
-              - key: zenoh-router.config.json5
-                path: zenoh-router.config.json5
+              - key: zenoh-router.config.json
+                path: zenoh-router.config.json
       containers:
         - name: router
-          image: registry.robotnik.ws/library/zenoh-rmw:iron-devel
+          {{- include "zenoh-image" .}}
+          #image: docker.io/robotnik/zenoh-rmw:iron-0.0.1-rc01
           {{- include "lifecycle" .}}
           args:
             - ros2
@@ -41,8 +42,8 @@ spec:
             - rmw_zenohd
           volumeMounts:
             - name: zenoh-cfg
-              mountPath: /home/robot/config/zenoh-router.config.json5
-              subPath: zenoh-router.config.json5
+              mountPath: /home/robot/config/zenoh-router.config.json
+              subPath: zenoh-router.config.json
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-{{ .Release.Revision }}-zenoh-router-env

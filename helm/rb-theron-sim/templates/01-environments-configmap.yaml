@@ -5,7 +5,7 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-{{ .Release.Revision }}-zenoh-session-env
 data:
-  ZENOH_SESSION_CONFIG_URI: /home/robot/config/zenoh-sessions.config.json5
+  ZENOH_SESSION_CONFIG_URI: /home/robot/config/zenoh-sessions.config.json
 {{ end }}
 
 {{ if eq .Values.ros.rmw "rmw_zenoh_cpp" }}
@@ -15,7 +15,7 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-{{ .Release.Revision }}-zenoh-router-env
 data:
-  ZENOH_ROUTER_CONFIG_URI: /home/robot/config/zenoh-router.config.json5
+  ZENOH_ROUTER_CONFIG_URI: /home/robot/config/zenoh-router.config.json
   RUST_LOG: zenoh=info
 {{ end }}
 

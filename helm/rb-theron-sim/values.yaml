@@ -7,11 +7,12 @@ ros:
   discovery: subnet
   distro: humble
   images:
-    registry: "docker.io"
-    project: "robotnik"
-    image: "robotnik-simulations"
-    simulation: "rb-theron-gazebo"
-    version: 0.3.0-rc07
+    simulation:
+      registry: "docker.io"
+      project: "robotnik"
+      repository: "robotnik-simulations"
+      flavor: "rb-theron-gazebo"
+      version: 0.3.0-rc07
   gazebo:
     map: opil_factory
 services:

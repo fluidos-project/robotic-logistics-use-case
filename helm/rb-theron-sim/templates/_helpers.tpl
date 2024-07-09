@@ -35,27 +35,28 @@
           configMap:
             name: {{ .Release.Name }}-{{ .Release.Revision }}-zenoh-config
             items:
-              - key: zenoh-sessions.config.json5
-                path: zenoh-sessions.config.json5
+              - key: zenoh-sessions.config.json
+                path: zenoh-sessions.config.json
 {{- end}}
 {{- end}}
 
 {{- define "zenoh-session-volume-mount" }}
 {{- if eq .Values.ros.rmw "rmw_zenoh_cpp" }}
             - name: zenoh-cfg
-              mountPath: /home/robot/config/zenoh-sessions.config.json5
-              subPath: zenoh-sessions.config.json5
+              mountPath: /home/robot/config/zenoh-sessions.config.json
+              subPath: zenoh-sessions.config.json
 {{- end}}
 {{- end}}
 
 {{- define "simulation-image" }}
-{{- if eq .Values.ros.images.registry "docker.io" }}
-          image: {{ .Values.ros.images.project }}/{{ .Values.ros.images.image }}:{{ .Values.ros.images.simulation }}-{{ .Values.ros.distro }}-{{ .Values.ros.images.version }}
-{{- else}}
-          image: {{ .Values.ros.images.registry }}/{{ .Values.ros.images.project }}/{{ .Values.ros.images.image }}:{{ .Values.ros.images.simulation }}-{{ .Values.ros.distro }}-{{ .Values.ros.images.version }}
-{{- end}}
+          image: {{ .Values.ros.images.simulation.registry }}/{{ .Values.ros.images.simulation.project }}/{{ .Values.ros.images.simulation.repository }}:{{ .Values.ros.images.simulation.flavor }}-{{ .Values.ros.distro }}-{{ .Values.ros.images.simulation.version }}
           imagePullPolicy: Always
 {{- end}}
+{{- define "zenoh-image" }}
+          image: {{ .Values.ros.images.zenoh.registry }}/{{ .Values.ros.images.zenoh.project }}/{{ .Values.ros.images.zenoh.repository }}:{{ .Values.ros.distro }}-{{ .Values.ros.images.zenoh.version }}
+          imagePullPolicy: Always
+{{- end}}
+
 {{- define "ros-common-env" }}
             - configMapRef:
                 name: {{ .Release.Name }}-{{ .Release.Revision }}-ros-env
