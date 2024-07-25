@@ -23,9 +23,8 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       - uses: addnab/docker-run-action@v3
-        working-directory: ./charts
         with:
-          options: -v ${{ github.workspace }}:/helm-docs -u $(id -u)
+          options: -v ${{ github.workspace }}/charts:/helm-docs -u $(id -u)
           image: jnorwood/helm-docs:v1.14.2
           run: --skip-version-footer
       # Commit all changed files back to the repository
