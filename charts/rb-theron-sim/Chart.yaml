@@ -2,7 +2,7 @@
 name: rb-theron-sim
 description: Robotnik RB-THERON Simulation on ROS2
 type: application
-version: 0.0.1
+version: 0.0.3
 apiVersion: v2
 keywords:
   - kubernetes
@@ -21,11 +21,12 @@ icon: https://avatars.githubusercontent.com/u/7921985?s=200&v=4
 maintainers:
   - name: Guillem Gari
     url: https://github.com/ggari-robotnik
+    email: ggari@robotnik.es
 annotations:
   artifacthub.io/changes: |
     - kind: Added
-      description: "first version"
+      description: "Format and repository fixing"
   artifacthub.io/license: BSD 3-Clause
   artifacthub.io/screenshots: |
     - title: Rviz interface
-      url: https://github.com/fluidos-project/robotic-logistics-use-case/blob/main/doc/k8s-ros2-rb-theron-rviz-web.gif
+      url: https://github.com/fluidos-project/robotic-logistics-use-case/blob/8c4578fc15574a765ba5ef047ed9ecc117669d84/doc/k8s-ros2-rb-theron-rviz-web.gif
