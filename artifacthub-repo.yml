@@ -9,7 +9,7 @@
 # when the hash of the last commit in the branch you set up changes. This does
 # NOT apply to ownership claim operations, which are processed immediately.
 #
-repositoryID:
+repositoryID: 2a78e98e-7e4d-4a3b-9e23-9df49474bb9a
 owners: # (optional, used to claim repository ownership)
   - name: ggari
     email: ggari@robotnik.es
