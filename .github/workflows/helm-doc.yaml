@@ -30,7 +30,7 @@ jobs:
       - run: |
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "Update Chart readme"
+            git commit -m "Automated chart README.md update"
             git push
           else
             echo "No changes to commit."
