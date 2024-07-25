@@ -27,7 +27,10 @@ jobs:
           options: -v ${{ github.workspace }}/charts:/helm-docs
           image: jnorwood/helm-docs:v1.14.2
           run: /usr/bin/helm-docs --skip-version-footer
-      # Commit all changed files back to the repository
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Update Chart readme
+      - run: |
+          git commit -m "Update Chart readme"
+          git push
+      # # Commit all changed files back to the repository
+      # - uses: stefanzweifel/git-auto-commit-action@v5
+      #   with:
+      #     commit_message: Update Chart readme
