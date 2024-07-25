@@ -2,7 +2,7 @@
 name: rb-theron-sim
 description: Robotnik RB-THERON Simulation on ROS2
 type: application
-version: 0.0.2
+version: 0.0.3
 apiVersion: v2
 keywords:
   - kubernetes
@@ -25,7 +25,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: Added
-      description: "Added Readme content"
+      description: "Format and repository fixing"
   artifacthub.io/license: BSD 3-Clause
   artifacthub.io/screenshots: |
     - title: Rviz interface
