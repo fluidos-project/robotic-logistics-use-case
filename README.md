@@ -7,6 +7,7 @@ Kubernetes manifest files for simulation of a Robotnik RB-theron on ROS2
 - Kubernetes >=1.25
 - Ingress controller
 - kubectl
+- Helm
 
 ## Deployment
 
