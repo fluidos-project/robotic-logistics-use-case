@@ -4,6 +4,40 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: Added
+          description: "Added Readme content"
+      artifacthub.io/license: BSD 3-Clause
+      artifacthub.io/screenshots: |-
+        - title: Rviz interface
+          url: https://github.com/fluidos-project/robotic-logistics-use-case/blob/main/doc/rb-theron-rviz-02.png
+    apiVersion: v2
+    created: "2024-07-25T14:45:58.155809513Z"
+    description: Robotnik RB-THERON Simulation on ROS2
+    digest: 688e601a2fd545f22ba9893879935d75ca63bb3c83c6325fab8f4f617ea60217
+    home: https://github.com/fluidos-project/robotic-logistics-use-case
+    icon: https://avatars.githubusercontent.com/u/7921985?s=200&v=4
+    keywords:
+    - kubernetes
+    - ros
+    - ros2
+    - rb-theron
+    - zenoh
+    - robotics
+    - robot
+    - fluidos
+    - rmw
+    maintainers:
+    - name: Guillem Gari
+      url: https://github.com/ggari-robotnik
+    name: rb-theron-sim
+    sources:
+    - https://github.com/fluidos-project/robotic-logistics-use-case
+    type: application
+    urls:
+    - https://github.com/fluidos-project/robotic-logistics-use-case/releases/download/rb-theron-sim-0.0.2/rb-theron-sim-0.0.2.tgz
+    version: 0.0.2
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: Added
           description: "first version"
       artifacthub.io/license: BSD 3-Clause
       artifacthub.io/screenshots: |-
@@ -35,4 +69,4 @@ entries:
     urls:
     - https://github.com/fluidos-project/robotic-logistics-use-case/releases/download/rb-theron-sim-0.0.1/rb-theron-sim-0.0.1.tgz
     version: 0.0.1
-generated: "2024-07-25T10:32:21.968683429Z"
+generated: "2024-07-25T14:45:58.155821495Z"
