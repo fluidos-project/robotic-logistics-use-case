@@ -12,6 +12,18 @@ Kubernetes manifest files for simulation of a Robotnik RB-theron on ROS2
 
 ### Helm chart
 
+[Helm chart documentation](charts/rb-theron-sim/README.md)
+
+### helm repo
+
+```bash
+helm repo add fluidos-robotic-uc https://fluidos-project.github.io/robotic-logistics-use-case
+helm repo update
+helm upgrade --install test fluidos-robotic-uc/rb-theron-sim
+```
+
+### local development
+
 ```bash
 git clone https://github.com/fluidos-project/robotic-logistics-use-case.git
 cd robotic-logistics-use-case/helm
