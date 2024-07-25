@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - devel
+    tags:
+      - '*'  # Triggers on any tag push
   workflow_dispatch:
 
 jobs:
