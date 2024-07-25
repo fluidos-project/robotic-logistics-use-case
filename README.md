@@ -10,9 +10,19 @@ Kubernetes manifest files for simulation of a Robotnik RB-theron on ROS2
 
 ## Deployment
 
+### Helm chart
+
 ```bash
-git clone git@github.com:fluidos-project/WP7_robotic_logistics.git
-cd WP7_robotic_logistics/k8s
+git clone https://github.com/fluidos-project/robotic-logistics-use-case.git
+cd robotic-logistics-use-case/helm
+helm upgrade --install test ./rb-theron-sim  -f rb-theron-sim/values-iron-zenoh.yaml
+```
+
+### classic
+
+```bash
+git clone https://github.com/fluidos-project/robotic-logistics-use-case.git
+cd robotic-logistics-use-case/k8s
 kubectl create namespace robots
 kubectl apply -f pseudo-chart
 ```

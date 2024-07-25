@@ -1,0 +1,55 @@
+{{ if eq .Values.ros.rmw "rmw_zenoh_cpp" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zenoh-rmw-router
+  labels:
+    app: zenoh-rmw-router
+    group: robot-common-group
+    robotType: simulated
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zenoh-rmw-router
+      group: robot-common-group
+      robotType: simulated
+  template:
+    metadata:
+      labels:
+        app: zenoh-rmw-router
+        group: robot-common-group
+        robotType: simulated
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: zenoh-cfg
+          configMap:
+            name: {{ .Release.Name }}-{{ .Release.Revision }}-zenoh-config
+            items:
+              - key: zenoh-router.config.json
+                path: zenoh-router.config.json
+      containers:
+        - name: router
+          {{- include "zenoh-image" .}}
+          #image: docker.io/robotnik/zenoh-rmw:iron-0.0.1-rc01
+          {{- include "lifecycle" .}}
+          args:
+            - ros2
+            - run
+            - rmw_zenoh_cpp
+            - rmw_zenohd
+          volumeMounts:
+            - name: zenoh-cfg
+              mountPath: /home/robot/config/zenoh-router.config.json
+              subPath: zenoh-router.config.json
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-{{ .Release.Revision }}-zenoh-router-env
+          ports:
+            - name: zenoh
+              containerPort: {{ .Values.services.zenoh.port }}
+              protocol: {{ .Values.services.zenoh.proto }}
+          tty: true
+{{ end }}
