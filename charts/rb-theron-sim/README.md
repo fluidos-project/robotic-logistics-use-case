@@ -10,7 +10,7 @@ Robotnik RB-THERON Simulation on ROS2
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Guillem Gari |  | <https://github.com/ggari-robotnik> |
+| Guillem Gari | <ggari@robotnik.es> | <https://github.com/ggari-robotnik> |
 
 ## Source Code
 
@@ -34,8 +34,8 @@ Robotnik RB-THERON Simulation on ROS2
 | ros.images.zenoh.repository | string | `"zenoh-rmw"` | repository for zenoh-router image. ignored if `ros.rwm` is not `rmw_zenoh_cpp` |
 | ros.images.zenoh.version | string | `"0.0.1-rc00"` | version tag for zenoh-router image. ignored if `ros.rwm` is not `rmw_zenoh_cpp` |
 | ros.rmw | string | `"rmw_cyclonedds_cpp"` | ROS MiddleWare Implementation. Allowed values: `rmw_cyclonedds_cpp` `rmw_fastrtps_cpp`, or `rmw_zenoh_cpp`. zenoh is only available in distro `iron` or above |
-| services.gazebo.name | string | `"robots-gazebo"` | service name. |
-| services.gazebo.port | int | `11345` | service port. |
-| services.zenoh.name | string | `"zenoh-router"` | router service name. ignored if `ros.rwm` is not `rmw_zenoh_cpp` |
-| services.zenoh.port | int | `7447` | router service port. ignored if `ros.rwm` is not `rmw_zenoh_cpp` |
-| services.zenoh.proto | string | `"TCP"` | router service protocol. ignored if `ros.rwm` is not `rmw_zenoh_cpp` |
+| services.gazebo.name | string | `"robots-gazebo"` | Gazebo service name. |
+| services.gazebo.port | int | `11345` | Gazebo service port. |
+| services.zenoh.name | string | `"zenoh-router"` | Zenoh router service name. ignored if `ros.rwm` is not `rmw_zenoh_cpp` |
+| services.zenoh.port | int | `7447` | Zenoh router service port. ignored if `ros.rwm` is not `rmw_zenoh_cpp` |
+| services.zenoh.proto | string | `"TCP"` | Zenoh router service protocol. ignored if `ros.rwm` is not `rmw_zenoh_cpp` |
