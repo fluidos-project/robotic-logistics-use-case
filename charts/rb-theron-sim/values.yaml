@@ -39,14 +39,14 @@ ros:
 ## @section Services parameters
 services:
   gazebo:
-    # -- service name.
+    # -- Gazebo service name.
     name: robots-gazebo
-    # -- service port.
+    # -- Gazebo service port.
     port: 11345
   zenoh:
-    # -- router service name. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+    # -- Zenoh router service name. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
     name: zenoh-router
-    # -- router service port. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+    # -- Zenoh router service port. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
     port: 7447
-    # -- router service protocol. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+    # -- Zenoh router service protocol. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
     proto: TCP
