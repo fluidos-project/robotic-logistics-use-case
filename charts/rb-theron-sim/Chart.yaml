@@ -2,7 +2,7 @@
 name: rb-theron-sim
 description: Robotnik RB-THERON Simulation on ROS2
 type: application
-version: 0.0.1
+version: 0.0.2
 apiVersion: v2
 keywords:
   - kubernetes
@@ -24,8 +24,8 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: Added
-      description: "first version"
+      description: "Added Readme content"
   artifacthub.io/license: BSD 3-Clause
   artifacthub.io/screenshots: |
     - title: Rviz interface
-      url: https://github.com/fluidos-project/robotic-logistics-use-case/blob/main/doc/k8s-ros2-rb-theron-rviz-web.gif
+      url: https://github.com/fluidos-project/robotic-logistics-use-case/blob/main/doc/rb-theron-rviz-02.png

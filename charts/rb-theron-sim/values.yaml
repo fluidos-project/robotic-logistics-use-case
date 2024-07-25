@@ -1,21 +1,52 @@
 ---
+## @section Containers parameters
 containers:
   environment:
+    # -- Removes the debug features.
     production: true
+## @section ROS parameters
 ros:
+  # -- ROS MiddleWare Implementation. Allowed values: `rmw_cyclonedds_cpp` `rmw_fastrtps_cpp`, or `rmw_zenoh_cpp`. zenoh is only available in distro `iron` or above
   rmw: rmw_cyclonedds_cpp
+  # -- Middleware automatic discovery range. Allowed values: `localhost` `subnet`, `off` or `system_default`.
   discovery: subnet
+  # -- ROS distribution. Allowed values: `humble` or `iron`.
   distro: humble
   images:
     simulation:
+      # -- registry for simulation image
       registry: "docker.io"
+      # -- project for simulation image
       project: "robotnik"
+      # -- repository for simulation image
       repository: "robotnik-simulations"
+      # -- flavor tag for simulation image
       flavor: "rb-theron-gazebo"
+      # -- version tag for simulation image
       version: 0.3.0-rc07
+    zenoh:
+      # -- registry for zenoh-router image. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+      registry: "docker.io"
+      # -- project for zenoh-router image. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+      project: "robotnik"
+      # -- repository for zenoh-router image. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+      repository: "zenoh-rmw"
+      # -- version tag for zenoh-router image. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+      version: 0.0.1-rc00
   gazebo:
+    # -- Map to use in the simulation.
     map: opil_factory
+## @section Services parameters
 services:
   gazebo:
+    # -- service name.
     name: robots-gazebo
+    # -- service port.
     port: 11345
+  zenoh:
+    # -- router service name. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+    name: zenoh-router
+    # -- router service port. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+    port: 7447
+    # -- router service protocol. ignored if `ros.rwm` is not `rmw_zenoh_cpp`
+    proto: TCP
