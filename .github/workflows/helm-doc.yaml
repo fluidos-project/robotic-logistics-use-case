@@ -12,16 +12,13 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    env:
+      FILES_TO_COMMIT: ""
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       - uses: addnab/docker-run-action@v3
         with:
           options: -v ${{ github.workspace }}/charts:/helm-docs
@@ -29,13 +26,13 @@ jobs:
           run: /usr/bin/helm-docs --skip-version-footer
       - run: |
           git add .
-          if ! git diff --cached --quiet; then
-            git commit -m "Automated chart README.md update"
-            git push
-          else
-            echo "No changes to commit."
-          fi
-      # # Commit all changed files back to the repository
-      # - uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: Update Chart readme
+          echo "FILES_TO_COMMIT=$(git diff --name-only --cached)" >> "$GITHUB_ENV"
+      - name: Commit file
+        uses: chromeq/commit@v2.x
+        if: ${{ env.FILES_TO_COMMIT != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: ${{ env.FILES_TO_COMMIT }}
+          commit-message: Automated chart README.md update
+          ref: ${{ github.ref }}
