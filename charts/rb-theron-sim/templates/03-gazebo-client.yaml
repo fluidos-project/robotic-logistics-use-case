@@ -2,9 +2,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rviz
+  name: gazebo-client
   labels:
-    app: rviz
+    app: gazebo-client
     group: robot-common-group
     robotType: simulated
 spec:
@@ -12,14 +12,14 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: rviz
+      app: gazebo-client
       group: robot-common-group
       robotType: simulated
   replicas: 1
   template:
     metadata:
       labels:
-        app: rviz
+        app: gazebo-client
         group: robot-common-group
         robotType: simulated
     spec:
@@ -29,7 +29,7 @@ spec:
       initContainers:
         {{- include "novnc-container" . }}
       containers:
-        - name: rviz
+        - name: gazebo-client
           {{- include "simulation-image" .}}
           {{- include "lifecycle" .}}
           volumeMounts:
@@ -39,9 +39,9 @@ spec:
           envFrom:
             {{- include "ros-common-env" . }}
             - configMapRef:
-                name: {{ .Release.Name }}-{{ .Release.Revision }}-world-env
+                name: {{ .Release.Name }}-{{ .Release.Revision }}-gazebo-server-env
             - configMapRef:
-                name: {{ .Release.Name }}-{{ .Release.Revision }}-launcher-rviz-env
+                name: {{ .Release.Name }}-{{ .Release.Revision }}-launcher-gazebo-client-env
           ports:
             - containerPort: 5900
               name: vnc
@@ -54,5 +54,4 @@ spec:
         {{- include "php-container" . }}
           env:
             - name: WEBSOCKITY_PATH
-              value: "websocket"
-        {{- include "filebrowser-container" . }}
+              value: "gazebo/websocket"
