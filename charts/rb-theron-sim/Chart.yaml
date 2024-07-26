@@ -2,7 +2,7 @@
 name: rb-theron-sim
 description: Robotnik RB-THERON Simulation on ROS2
 type: application
-version: 0.0.3
+version: 0.0.4
 apiVersion: v2
 keywords:
   - kubernetes
@@ -25,8 +25,18 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: Added
-      description: "Format and repository fixing"
+      description: "New container Gazebo-client"
+    - kind: Added
+      description: "Added helm check github action before releasing"
   artifacthub.io/license: BSD 3-Clause
   artifacthub.io/screenshots: |
-    - title: Rviz interface
-      url: https://github.com/fluidos-project/robotic-logistics-use-case/blob/8c4578fc15574a765ba5ef047ed9ecc117669d84/doc/k8s-ros2-rb-theron-rviz-web.gif
+    - title: Animated Rviz interface
+      url: https://fluidos-project.github.io/robotic-logistics-use-case/img/gazebo-01.png
+    - title: Rviz capture 1
+      url: https://fluidos-project.github.io/robotic-logistics-use-case/img/rb-theron-rviz-01.png
+    - title: Rviz capture 2
+      url: https://fluidos-project.github.io/robotic-logistics-use-case/img/rb-theron-rviz-02.png
+    - title: Rviz capture 3
+      url: https://fluidos-project.github.io/robotic-logistics-use-case/img/rb-theron-rviz-03.png
+    - title: Rviz capture 4
+      url: https://fluidos-project.github.io/robotic-logistics-use-case/img/rb-theron-rviz-04.png
