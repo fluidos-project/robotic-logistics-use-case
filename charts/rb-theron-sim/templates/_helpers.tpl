@@ -132,7 +132,7 @@
 {{- end}}
 {{- define "webserver-container" }}
         - name: webserver
-          image: nginx:1.25.1-alpine3.17
+          image: nginx:1.27.0-alpine3.19
           volumeMounts:
             - name: web
               mountPath: /var/www/html/web
