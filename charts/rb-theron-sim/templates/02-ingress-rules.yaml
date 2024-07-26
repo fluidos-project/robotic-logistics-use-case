@@ -8,20 +8,20 @@ spec:
   rules:
     - http:
         paths:
-#          - path: /gazebo
-#            pathType: Prefix
-#            backend:
-#              service:
-#                name: gazebo-client
-#                port:
-#                  number: 80
-#          - path: /gazebo/websocket
-#            pathType: Prefix
-#            backend:
-#              service:
-#                name: gazebo-client
-#                port:
-#                  number: 8080
+          - path: /gazebo
+            pathType: Prefix
+            backend:
+              service:
+                name: gazebo-client
+                port:
+                  number: 80
+          - path: /gazebo/websocket
+            pathType: Prefix
+            backend:
+              service:
+                name: gazebo-client
+                port:
+                  number: 8080
           - path: /
             pathType: Prefix
             backend:
@@ -42,4 +42,4 @@ spec:
               service:
                 name: rviz
                 port:
-                  number: 8081
+                  number: 81

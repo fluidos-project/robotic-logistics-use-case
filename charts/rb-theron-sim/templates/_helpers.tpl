@@ -56,6 +56,204 @@
           image: {{ .Values.ros.images.zenoh.registry }}/{{ .Values.ros.images.zenoh.project }}/{{ .Values.ros.images.zenoh.repository }}:{{ .Values.ros.distro }}-{{ .Values.ros.images.zenoh.version }}
           imagePullPolicy: Always
 {{- end}}
+{{- define "web-volumes" }}
+        - name: nginx-cfg
+          emptyDir: {}
+        - name: web
+          emptyDir: {}
+        - name: data
+          emptyDir: {}
+{{- end}}
+{{- define "novnc-container" }}
+        - name: web-loader
+          imagePullPolicy: Always
+          image: robotnik/novnc:web-1.3.0-2-rc02
+          volumeMounts:
+            - name: web
+              mountPath: /web
+            - name: nginx-cfg
+              mountPath: /config
+          command:
+            - /bin/sh
+            - '-c'
+          args:
+            - |
+              if ! cp -r /data/web/* /web
+              then
+                echo "error loading web"
+                exit 1
+              fi
+              if ! cp -r /data/config/* /config
+              then
+                echo "error loading nginx-config"
+                exit 1
+              fi
+              echo "done"
+{{- end}}
+{{- define "websockify-container" }}
+        - name: websocket
+          image: robotnik/websockify:backend-0.11.0-1
+          imagePullPolicy: Always
+          env:
+            - name: USE_ENV_CONFIG
+              value: "true"
+            - name: VERBOSE
+              value: "true"
+            - name: VNC_HOST
+              value: "localhost"
+            - name: VNC_PORT
+              value: "5900"
+            - name: WS_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+              name: websocket
+          startupProbe:
+            tcpSocket:
+              port: websocket
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: websocket
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: websocket
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 30
+            timeoutSeconds: 10
+{{- end}}
+{{- define "webserver-container" }}
+        - name: webserver
+          image: nginx:1.25.1-alpine3.17
+          volumeMounts:
+            - name: web
+              mountPath: /var/www/html/web
+            - name: nginx-cfg
+              mountPath: /etc/nginx/templates/
+          imagePullPolicy: Always
+          env:
+            - name: WEBSITE_PATH
+              value: "/var/www/html/web"
+            - name: PHP_SERVER
+              value: "localhost"
+            - name: PHP_PORT
+              value: "9000"
+            - name: NGINX_SERVER
+              value: "localhost"
+            - name: NGINX_PORT
+              value: "80"
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 30
+            timeoutSeconds: 10
+{{- end}}
+{{- define "php-container" }}
+        - name: php
+          image: php:8.0.30-fpm-alpine3.16
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: web
+              mountPath: /var/www/html/web
+          ports:
+            - containerPort: 9000
+              name: php
+          startupProbe:
+            tcpSocket:
+              port: php
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: php
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: php
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 30
+            timeoutSeconds: 10
+{{- end}}
+{{- define "filebrowser-container" }}
+        - name: fileserver
+          image: robotnik/filebrowser:2.24.2-1
+          volumeMounts:
+            - name: data
+              mountPath: /srv
+          imagePullPolicy: Always
+          env:
+            - name: WEB_PORT
+              value: "81"
+          command:
+            - /filebrowser
+          args:
+            - --config=/.filebrowser.json
+            - --port
+            - "81"
+          ports:
+            - containerPort: 81
+              name: http
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 30
+            timeoutSeconds: 10
+{{- end}}
 
 {{- define "ros-common-env" }}
             - configMapRef:

@@ -211,3 +211,18 @@ data:
     -d ${RVIZ_CFG_FILE}
     --ros-args
     --remap use_sim_time:=true
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-{{ .Release.Revision }}-launcher-gazebo-client-env
+data:
+  STARTUP_TYPE: graphical
+  GUI_ZENITY_TEXT: "Launch Gazebo?"
+  RVIZ_CFG_FILE: /home/robot/config/rb-theron.rviz
+  GUI_COMMAND: >-
+    ros2
+    launch
+    gazebo_ros
+    gzclient.launch.py
