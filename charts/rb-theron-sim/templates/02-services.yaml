@@ -31,7 +31,6 @@ spec:
     group: robot-common-group
     robotType: simulated
 ---
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -52,5 +51,25 @@ spec:
       protocol: TCP
   selector:
     app: rviz
+    group: robot-common-group
+    robotType: simulated
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gazebo-client
+spec:
+  type: ClusterIP
+  ports:
+    - name: websocket
+      port: 8080
+      targetPort: 8080
+    - name: webserver
+      port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: gazebo-client
     group: robot-common-group
     robotType: simulated
