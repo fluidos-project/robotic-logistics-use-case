@@ -3,6 +3,51 @@ entries:
   rb-theron-sim:
   - annotations:
       artifacthub.io/changes: |
+        - kind: Changed
+          description: "Changed version of nginx to 1.27.0-alpine3.19"
+        - kind: Fixed
+          description: "Fixed first screenshot link"
+      artifacthub.io/license: BSD 3-Clause
+      artifacthub.io/screenshots: |
+        - title: Animated Rviz interface
+          url: https://fluidos-project.github.io/robotic-logistics-use-case/img/k8s-ros2-rb-theron-rviz-web.gif
+        - title: Rviz capture 1
+          url: https://fluidos-project.github.io/robotic-logistics-use-case/img/rb-theron-rviz-01.png
+        - title: Rviz capture 2
+          url: https://fluidos-project.github.io/robotic-logistics-use-case/img/rb-theron-rviz-02.png
+        - title: Rviz capture 3
+          url: https://fluidos-project.github.io/robotic-logistics-use-case/img/rb-theron-rviz-03.png
+        - title: Rviz capture 4
+          url: https://fluidos-project.github.io/robotic-logistics-use-case/img/rb-theron-rviz-04.png
+    apiVersion: v2
+    created: "2024-07-26T16:02:02.779060982Z"
+    description: Robotnik RB-THERON Simulation on ROS2
+    digest: dbeb5307c5fc95b19a096578833623a0d96b73d5b6fdd4297445e7ef9b11ac26
+    home: https://github.com/fluidos-project/robotic-logistics-use-case
+    icon: https://avatars.githubusercontent.com/u/7921985?s=200&v=4
+    keywords:
+    - kubernetes
+    - ros
+    - ros2
+    - rb-theron
+    - zenoh
+    - robotics
+    - robot
+    - fluidos
+    - rmw
+    maintainers:
+    - email: ggari@robotnik.es
+      name: Guillem Gari
+      url: https://github.com/ggari-robotnik
+    name: rb-theron-sim
+    sources:
+    - https://github.com/fluidos-project/robotic-logistics-use-case
+    type: application
+    urls:
+    - https://github.com/fluidos-project/robotic-logistics-use-case/releases/download/rb-theron-sim-0.0.5/rb-theron-sim-0.0.5.tgz
+    version: 0.0.5
+  - annotations:
+      artifacthub.io/changes: |
         - kind: Added
           description: "New container Gazebo-client"
         - kind: Added
@@ -149,4 +194,4 @@ entries:
     urls:
     - https://github.com/fluidos-project/robotic-logistics-use-case/releases/download/rb-theron-sim-0.0.1/rb-theron-sim-0.0.1.tgz
     version: 0.0.1
-generated: "2024-07-26T12:35:18.911152832Z"
+generated: "2024-07-26T16:02:02.779085638Z"
