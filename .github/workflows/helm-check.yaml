@@ -20,27 +20,3 @@ jobs:
         uses: kubevious/cli@v1.0.62
         with:
           helm_chart: charts/rb-theron-sim
-
----
-name: helm validation override
-
-on:
-  push:
-    branches:
-      - devel
-  workflow_dispatch:
-
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Validate helm-chart with override
-        id: helm-chart-validation
-        uses: kubevious/cli@v1.0.62
-        with:
-          helm_chart: charts/rb-theron-sim
-          helm_override:  charts/rb-theron-sim/values-iron-zenoh.yaml
